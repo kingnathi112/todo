@@ -1,18 +1,66 @@
 {
 	"info": {
-		"_postman_id": "99e865ab-345a-458b-adca-3778994b6a89",
+		"_postman_id": "9c9a06f2-4ef9-4334-8b57-bd68d2c7f6ef",
 		"name": "Todo API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
 			"name": "Register User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"//Create a random number to create autoincrement\r",
+							"var incrementValue = pm.environment.get(\"padding\");\r",
+							"var username = pm.environment.get(\"username\");\r",
+							"if(!incrementValue){\r",
+							"    pm.environment.set(\"padding\",10);\r",
+							"}\r",
+							"pm.environment.set(\"email\", username + incrementValue + \"@gmail.com\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ensure The Code Status is 201 [Created]\", function(){\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure the User is successfully registered\", function(){\r",
+							"    var location = pm.response.headers.get(\"Location\");\r",
+							"    var stringId = location.substring(location.lastIndexOf(\"/\") + 1);\r",
+							"    var Id = parseInt(stringId);\r",
+							"    pm.expect(Id >= 1);\r",
+							"});\r",
+							"\r",
+							"//To set parameters to help with easy use of the scripts\r",
+							"if(pm.response.code === 201){\r",
+							"\r",
+							"    //To increment the padding value, to generate new email\r",
+							"    var incrementValue = pm.environment.get(\"padding\");\r",
+							"    pm.environment.set(\"padding\", ++incrementValue);\r",
+							"\r",
+							"    //To get a new created ID\r",
+							"    var location = pm.response.headers.get(\"Location\");\r",
+							"    var userId = location.substring(location.lastIndexOf(\"/\") + 1);\r",
+							"    pm.environment.set(\"NewUserId\", userId);\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{ \n    \"email\": \"test4@test.com\",\n    \"password\": \"test123\"\n}",
+					"raw": "{ \n    \"firstName\": \"Nkosinathi\",\n    \"lastName\": \"Mlotshwa\",\n    \"username\": \"{{username}}\",\n    \"email\": \"{{email}}\",\n    \"password\": \"test1234$\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -41,27 +89,39 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "20e6d6af-11c0-490a-a50b-5b23b4e9aef7",
 						"exec": [
-							"let response = pm.response.json();",
+							"pm.test(\"Ensure the Code Status is 200 [OK]\", function(){",
+							"    pm.response.to.have.status(200);",
+							"});",
 							"",
-							"pm.collectionVariables.set('auth-token', response.token);"
+							"pm.test(\"Ensure that the Token is returned\", function(){",
+							"    let response = pm.response.json();",
+							"    pm.expect(response.token != \"\");",
+							"    pm.environment.set('normal-user-token', response.token);",
+							"});",
+							"",
+							"pm.test(\"Ensure that the Expiry date is returned\", function(){",
+							"    let response = pm.response.json();",
+							"    pm.expect(response.expires != \"\");",
+							"});"
 						],
 						"type": "text/javascript"
 					}
 				}
 			],
 			"request": {
+				"auth": {
+					"type": "noauth"
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"test1@test.com\",\n    \"password\": \"test123\"\n}",
+					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
-						},
-						"urlencoded": {}
+						}
 					}
 				},
 				"url": {
@@ -81,17 +141,35 @@
 		},
 		{
 			"name": "Get user by id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ensure the Code Status is 200 [OK]\", function(){\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure User Id matches parsed Id\", function(){\r",
+							"    let response = pm.response.json();\r",
+							"    pm.expect(response.id === \"{{new-user-id}}\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "bearer {{auth-token}}",
+						"value": "bearer {{admin-token}}",
 						"type": "text"
 					}
 				],
 				"url": {
-					"raw": "http://localhost:5000/api/users",
+					"raw": "http://localhost:5000/api/users/{{new-user-id}}",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -99,7 +177,8 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"users"
+						"users",
+						"{{new-user-id}}"
 					]
 				},
 				"description": "Get user by id\n\nMust be admin\nCan only retrieve yourself, i.e., the logged in use"
@@ -108,18 +187,48 @@
 		},
 		{
 			"name": "Create Todo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ensure the Code Status is 201 [Created]\", function(){\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Todo item has been created\", function(){\r",
+							"    var location = pm.response.headers.get(\"Location\");\r",
+							"    var stringId = location.substring(location.lastIndexOf(\"/\") + 1);\r",
+							"    var Id = parseInt(stringId);\r",
+							"    pm.expect(Id >= 1);\r",
+							"});\r",
+							"//Set todo-id\r",
+							"if(pm.response.code === 201){\r",
+							"    //To get a new created ID\r",
+							"    var responseLocation = pm.response.headers.get(\"Location\");\r",
+							"    var toId = responseLocation[responseLocation.length - 1];\r",
+							"    pm.environment.set(\"todo-id\", toId);\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "noauth"
+				},
 				"method": "POST",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "bearer {{auth-token}}",
+						"value": "bearer {{normal-user-token}}",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"Title\": \"Test B\",\n    \"Description\": \"Test B\",\n    \"IsComplete\": \"false\"\n}",
+					"raw": "{\n    \"Title\": \"{{username}}_Todo\",\n    \"Description\": \"Writing a postman test for this todo\",\n    \"IsComplete\": \"false\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -143,15 +252,68 @@
 		},
 		{
 			"name": "Get todo by Id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer {{normal-user-token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/todos/{{TodoId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"todos",
+						"{{TodoId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all todos (authorized in user)",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
 				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "bearer {{auth-token}}",
+						"value": "bearer {{admin-token}}",
 						"type": "text"
 					}
 				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
 					"raw": "http://localhost:5000/api/todos/1",
 					"protocol": "http",
@@ -169,45 +331,22 @@
 			"response": []
 		},
 		{
-			"name": "Get all todos (authorized in user)",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "bearer {{auth-token}}",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:5000/api/todos",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"todos"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Update todo",
 			"request": {
+				"auth": {
+					"type": "noauth"
+				},
 				"method": "PUT",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "bearer {{auth-token}}",
+						"value": "bearer {{normal-user-token}}",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"title\": \"Test Update\",\n    \"description\": \"Test Update\",\n    \"isComplete\": false\n}",
+					"raw": "{\n    \"title\": \"kingnathim_Todo\",\n    \"description\": \"Writing a method to get the recently created Todo ID.\",\n    \"isComplete\": true\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -215,7 +354,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/todos/9",
+					"raw": "http://localhost:5000/api/todos/{{TodoId}}",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -224,7 +363,7 @@
 					"path": [
 						"api",
 						"todos",
-						"9"
+						"{{TodoId}}"
 					]
 				}
 			},
@@ -300,7 +439,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "d428ec42-7611-4ad9-bf54-fdd5d6473308",
 						"exec": [
 							"console.log(pm.variables.get('auth-token'));"
 						],
@@ -309,11 +447,14 @@
 				}
 			],
 			"request": {
+				"auth": {
+					"type": "noauth"
+				},
 				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "bearer {{auth-token}}",
+						"value": "bearer {{admin-token}}",
 						"type": "text"
 					}
 				],
@@ -337,7 +478,6 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "402af9a3-46c7-45b6-aaa9-cfd26f0013f4",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -347,7 +487,6 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "d5852780-4204-420f-9495-7b35d6370bac",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -357,10 +496,12 @@
 	],
 	"variable": [
 		{
-			"id": "ffb0176d-548a-4765-898d-fc7d71a14658",
 			"key": "auth-token",
 			"value": ""
+		},
+		{
+			"key": "admin-token",
+			"value": ""
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }

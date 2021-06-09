@@ -1,18 +1,18 @@
 {
-	"id": "a5a6beee-dae1-43c2-bfde-c9d746ecf4b1",
+	"id": "b727c2bf-7ced-41fb-bd4a-6c9f32c46599",
 	"name": "Todo API",
-	"timestamp": "2021-06-09T20:51:47.562Z",
+	"timestamp": "2021-06-09T21:37:28.702Z",
 	"collection_id": "c6258a63-2b3e-4e1b-8f05-6607e14f872d",
 	"folder_id": 0,
 	"environment_id": "f5ac582c-637f-4042-a45d-51f69a87a403",
-	"totalPass": 40,
+	"totalPass": 50,
 	"totalFail": 0,
 	"results": [
 		{
 			"id": "91497ce7-5c34-479a-8c21-c7e28f3b0a9a",
 			"name": "Register User",
 			"url": "http://localhost:5000/api/auth/register",
-			"time": 98,
+			"time": 110,
 			"responseCode": {
 				"code": 201,
 				"name": "Created"
@@ -32,7 +32,7 @@
 				}
 			},
 			"times": [
-				98
+				110
 			],
 			"allTests": [
 				{
@@ -45,7 +45,7 @@
 			"id": "e07cb98f-5485-4265-9ca3-0f5097d496d6",
 			"name": "Authenticate User",
 			"url": "http://localhost:5000/api/auth",
-			"time": 64,
+			"time": 185,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -70,7 +70,7 @@
 				}
 			},
 			"times": [
-				64
+				185
 			],
 			"allTests": [
 				{
@@ -84,7 +84,7 @@
 			"id": "011fc5eb-00fe-4fbf-941f-052816d989d9",
 			"name": "Authenticate Admin",
 			"url": "http://localhost:5000/api/auth",
-			"time": 42,
+			"time": 57,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -109,7 +109,7 @@
 				}
 			},
 			"times": [
-				42
+				57
 			],
 			"allTests": [
 				{
@@ -122,8 +122,8 @@
 		{
 			"id": "8d808c02-4219-4ac3-b661-79410ec7e4ff",
 			"name": "Get user by id",
-			"url": "http://localhost:5000/api/users/8",
-			"time": 25,
+			"url": "http://localhost:5000/api/users/11",
+			"time": 31,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -153,7 +153,7 @@
 				}
 			},
 			"times": [
-				25
+				31
 			],
 			"allTests": [
 				{
@@ -168,7 +168,7 @@
 			"id": "eb7b56d7-03db-4be4-991a-738f41131a35",
 			"name": "Create Todo",
 			"url": "http://localhost:5000/api/todos",
-			"time": 61,
+			"time": 56,
 			"responseCode": {
 				"code": 201,
 				"name": "Created"
@@ -188,7 +188,7 @@
 				}
 			},
 			"times": [
-				61
+				56
 			],
 			"allTests": [
 				{
@@ -200,13 +200,14 @@
 		{
 			"id": "07d1e1b2-d761-4e26-99bb-2315dc670dc3",
 			"name": "Get todo by Id",
-			"url": "http://localhost:5000/api/todos/14",
-			"time": 41,
+			"url": "http://localhost:5000/api/todos/20",
+			"time": 58,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
 			},
 			"tests": {
+				"Ensure the Code Status is 200 [OK]": true,
 				"Ensure Title is correct": true,
 				"Ensure Description is correct": true,
 				"Ensure IsComplete is false": true,
@@ -215,6 +216,10 @@
 				"Ensure Email is correct": true
 			},
 			"testPassFailCounts": {
+				"Ensure the Code Status is 200 [OK]": {
+					"pass": 1,
+					"fail": 0
+				},
 				"Ensure Title is correct": {
 					"pass": 1,
 					"fail": 0
@@ -241,10 +246,11 @@
 				}
 			},
 			"times": [
-				41
+				58
 			],
 			"allTests": [
 				{
+					"Ensure the Code Status is 200 [OK]": true,
 					"Ensure Title is correct": true,
 					"Ensure Description is correct": true,
 					"Ensure IsComplete is false": true,
@@ -258,34 +264,58 @@
 			"id": "42d534a9-9bab-47ab-a7f1-42067107cbd6",
 			"name": "Get all todos (authorized in user)",
 			"url": "http://localhost:5000/api/todos",
-			"time": 43,
+			"time": 37,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
 			},
 			"tests": {
-				"Ensure the Code Status is 200 [OK]": true
+				"Ensure the Code Status is 200 [OK]": true,
+				"Ensure Title is correct": true,
+				"Ensure Description is correct": true,
+				"Ensure IsComplete is false": true,
+				"Ensure Last Update Date is correct": true
 			},
 			"testPassFailCounts": {
 				"Ensure the Code Status is 200 [OK]": {
 					"pass": 1,
 					"fail": 0
+				},
+				"Ensure Title is correct": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Ensure Description is correct": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Ensure IsComplete is false": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Ensure Last Update Date is correct": {
+					"pass": 1,
+					"fail": 0
 				}
 			},
 			"times": [
-				43
+				37
 			],
 			"allTests": [
 				{
-					"Ensure the Code Status is 200 [OK]": true
+					"Ensure the Code Status is 200 [OK]": true,
+					"Ensure Title is correct": true,
+					"Ensure Description is correct": true,
+					"Ensure IsComplete is false": true,
+					"Ensure Last Update Date is correct": true
 				}
 			]
 		},
 		{
 			"id": "e4e54b2f-224a-4d20-b492-a4dd1ee4796c",
 			"name": "Update todo",
-			"url": "http://localhost:5000/api/todos/14",
-			"time": 64,
+			"url": "http://localhost:5000/api/todos/20",
+			"time": 87,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -300,7 +330,7 @@
 				}
 			},
 			"times": [
-				64
+				87
 			],
 			"allTests": [
 				{
@@ -311,13 +341,14 @@
 		{
 			"id": "f5c0da8c-353f-49e4-8e55-882d3b16f5a9",
 			"name": "Get todo by Id [Updated]",
-			"url": "http://localhost:5000/api/todos/14",
-			"time": 35,
+			"url": "http://localhost:5000/api/todos/20",
+			"time": 46,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
 			},
 			"tests": {
+				"Ensure the Code Status is 200 [OK]": true,
 				"Ensure Title is correct": true,
 				"Ensure Description is correct": true,
 				"Ensure IsComplete is false": true,
@@ -326,6 +357,10 @@
 				"Ensure Email is correct": true
 			},
 			"testPassFailCounts": {
+				"Ensure the Code Status is 200 [OK]": {
+					"pass": 1,
+					"fail": 0
+				},
 				"Ensure Title is correct": {
 					"pass": 1,
 					"fail": 0
@@ -352,10 +387,11 @@
 				}
 			},
 			"times": [
-				35
+				46
 			],
 			"allTests": [
 				{
+					"Ensure the Code Status is 200 [OK]": true,
 					"Ensure Title is correct": true,
 					"Ensure Description is correct": true,
 					"Ensure IsComplete is false": true,
@@ -368,8 +404,8 @@
 		{
 			"id": "f87854ec-3ce9-4c41-b053-21730f2c53ca",
 			"name": "Update IsComplete field",
-			"url": "http://localhost:5000/api/todos/14/IsComplete",
-			"time": 74,
+			"url": "http://localhost:5000/api/todos/20/IsComplete",
+			"time": 71,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -384,7 +420,7 @@
 				}
 			},
 			"times": [
-				74
+				71
 			],
 			"allTests": [
 				{
@@ -395,13 +431,14 @@
 		{
 			"id": "835d58fe-c44b-44fa-afbc-943e3e064540",
 			"name": "Get todo by Id [Updated isComplete]",
-			"url": "http://localhost:5000/api/todos/14",
-			"time": 43,
+			"url": "http://localhost:5000/api/todos/20",
+			"time": 30,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
 			},
 			"tests": {
+				"Ensure the Code Status is 200 [OK]": true,
 				"Ensure Title is correct": true,
 				"Ensure Description is correct": true,
 				"Ensure IsComplete is true": true,
@@ -410,6 +447,10 @@
 				"Ensure Email is correct": true
 			},
 			"testPassFailCounts": {
+				"Ensure the Code Status is 200 [OK]": {
+					"pass": 1,
+					"fail": 0
+				},
 				"Ensure Title is correct": {
 					"pass": 1,
 					"fail": 0
@@ -436,10 +477,11 @@
 				}
 			},
 			"times": [
-				43
+				30
 			],
 			"allTests": [
 				{
+					"Ensure the Code Status is 200 [OK]": true,
 					"Ensure Title is correct": true,
 					"Ensure Description is correct": true,
 					"Ensure IsComplete is true": true,
@@ -452,8 +494,8 @@
 		{
 			"id": "3c4895c3-5370-4d38-a05e-18bc59786792",
 			"name": "Delete todo",
-			"url": "http://localhost:5000/api/todos/14",
-			"time": 66,
+			"url": "http://localhost:5000/api/todos/20",
+			"time": 56,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -483,7 +525,7 @@
 				}
 			},
 			"times": [
-				66
+				56
 			],
 			"allTests": [
 				{
@@ -498,32 +540,50 @@
 			"id": "fe0e8582-66b4-49bc-be31-dc51138f5259",
 			"name": "Get all users (Admin only)",
 			"url": "http://localhost:5000/api/users",
-			"time": 24,
+			"time": 27,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
 			},
 			"tests": {
-				"Ensure the Code Status is 200 [OK]": true
+				"Ensure the Code Status is 200 [OK]": true,
+				"User Id is correct": true,
+				"Ensure Username is correct": true,
+				"Ensure Email is correct": true
 			},
 			"testPassFailCounts": {
 				"Ensure the Code Status is 200 [OK]": {
 					"pass": 1,
 					"fail": 0
+				},
+				"User Id is correct": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Ensure Username is correct": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Ensure Email is correct": {
+					"pass": 1,
+					"fail": 0
 				}
 			},
 			"times": [
-				24
+				27
 			],
 			"allTests": [
 				{
-					"Ensure the Code Status is 200 [OK]": true
+					"Ensure the Code Status is 200 [OK]": true,
+					"User Id is correct": true,
+					"Ensure Username is correct": true,
+					"Ensure Email is correct": true
 				}
 			]
 		}
 	],
 	"count": 1,
-	"totalTime": 680,
+	"totalTime": 851,
 	"collection": {
 		"requests": [
 			{

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9c9a06f2-4ef9-4334-8b57-bd68d2c7f6ef",
+		"_postman_id": "c6258a63-2b3e-4e1b-8f05-6607e14f872d",
 		"name": "Todo API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -14,11 +14,11 @@
 						"exec": [
 							"//Create a random number to create autoincrement\r",
 							"var incrementValue = pm.environment.get(\"padding\");\r",
-							"var username = pm.environment.get(\"username\");\r",
 							"if(!incrementValue){\r",
 							"    pm.environment.set(\"padding\",10);\r",
+							"    incrementValue = pm.environment.get(\"padding\");\r",
 							"}\r",
-							"pm.environment.set(\"email\", username + incrementValue + \"@gmail.com\");"
+							"pm.environment.set(\"email\", \"kingnathi\" + incrementValue + \"@gmail.com\");"
 						],
 						"type": "text/javascript"
 					}
@@ -32,9 +32,9 @@
 							"});\r",
 							"\r",
 							"pm.test(\"Ensure the User is successfully registered\", function(){\r",
-							"    var location = pm.response.headers.get(\"Location\");\r",
-							"    var stringId = location.substring(location.lastIndexOf(\"/\") + 1);\r",
-							"    var Id = parseInt(stringId);\r",
+							"    let location = pm.response.headers.get(\"Location\");\r",
+							"    let stringId = location.substring(location.lastIndexOf(\"/\") + 1);\r",
+							"    let Id = parseInt(stringId);\r",
 							"    pm.expect(Id >= 1);\r",
 							"});\r",
 							"\r",
@@ -42,13 +42,13 @@
 							"if(pm.response.code === 201){\r",
 							"\r",
 							"    //To increment the padding value, to generate new email\r",
-							"    var incrementValue = pm.environment.get(\"padding\");\r",
+							"    let incrementValue = pm.environment.get(\"padding\");\r",
 							"    pm.environment.set(\"padding\", ++incrementValue);\r",
 							"\r",
 							"    //To get a new created ID\r",
-							"    var location = pm.response.headers.get(\"Location\");\r",
-							"    var userId = location.substring(location.lastIndexOf(\"/\") + 1);\r",
-							"    pm.environment.set(\"NewUserId\", userId);\r",
+							"    let location = pm.response.headers.get(\"Location\");\r",
+							"    let userId = location.substring(location.lastIndexOf(\"/\") + 1);\r",
+							"    pm.environment.set(\"new-user-id\", userId);\r",
 							"}"
 						],
 						"type": "text/javascript"
@@ -94,14 +94,14 @@
 							"    pm.response.to.have.status(200);",
 							"});",
 							"",
+							"let response = pm.response.json();",
+							"",
 							"pm.test(\"Ensure that the Token is returned\", function(){",
-							"    let response = pm.response.json();",
 							"    pm.expect(response.token != \"\");",
 							"    pm.environment.set('normal-user-token', response.token);",
 							"});",
 							"",
 							"pm.test(\"Ensure that the Expiry date is returned\", function(){",
-							"    let response = pm.response.json();",
 							"    pm.expect(response.expires != \"\");",
 							"});"
 						],
@@ -140,6 +140,61 @@
 			"response": []
 		},
 		{
+			"name": "Authenticate Admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ensure the Code Status is 200 [OK]\", function(){",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"pm.test(\"Ensure that the Token is returned\", function(){",
+							"    pm.expect(response.token != \"\");",
+							"    pm.environment.set('admin-token', response.token);",
+							"});",
+							"",
+							"pm.test(\"Ensure that the Expiry date is returned\", function(){",
+							"    pm.expect(response.expires != \"\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"{{admin-email}}\",\n    \"password\": \"{{admin-password}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/auth",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"auth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get user by id",
 			"event": [
 				{
@@ -150,9 +205,17 @@
 							"    pm.response.to.have.status(200);\r",
 							"});\r",
 							"\r",
+							"let response = pm.response.json();\r",
 							"pm.test(\"Ensure User Id matches parsed Id\", function(){\r",
-							"    let response = pm.response.json();\r",
-							"    pm.expect(response.id === \"{{new-user-id}}\");\r",
+							"    pm.expect(response.id).to.eql(parseInt(pm.environment.get(\"new-user-id\")));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Username is correct\", function(){\r",
+							"    pm.expect(response.username).to.be.eql(pm.environment.get(\"email\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Email is correct\", function(){\r",
+							"    pm.expect(response.email).to.be.eql(pm.environment.get(\"email\"));;\r",
 							"});"
 						],
 						"type": "text/javascript"
@@ -160,6 +223,9 @@
 				}
 			],
 			"request": {
+				"auth": {
+					"type": "noauth"
+				},
 				"method": "GET",
 				"header": [
 					{
@@ -197,18 +263,37 @@
 							"});\r",
 							"\r",
 							"pm.test(\"Ensure Todo item has been created\", function(){\r",
-							"    var location = pm.response.headers.get(\"Location\");\r",
-							"    var stringId = location.substring(location.lastIndexOf(\"/\") + 1);\r",
-							"    var Id = parseInt(stringId);\r",
+							"    let location = pm.response.headers.get(\"Location\");\r",
+							"    let stringId = location.substring(location.lastIndexOf(\"/\") + 1);\r",
+							"    let Id = parseInt(stringId);\r",
 							"    pm.expect(Id >= 1);\r",
 							"});\r",
 							"//Set todo-id\r",
 							"if(pm.response.code === 201){\r",
 							"    //To get a new created ID\r",
-							"    var responseLocation = pm.response.headers.get(\"Location\");\r",
-							"    var toId = responseLocation[responseLocation.length - 1];\r",
+							"    let location = pm.response.headers.get(\"Location\");\r",
+							"    let toId = location.substring(location.lastIndexOf(\"/\") + 1);\r",
 							"    pm.environment.set(\"todo-id\", toId);\r",
 							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let todoPadding = pm.environment.get(\"todo-padding\");\r",
+							"let moment = require('moment');\r",
+							"if(!todoPadding){\r",
+							"    pm.environment.set(\"todo-padding\", 12);\r",
+							"    todoPadding = pm.environment.get(\"todo-padding\");\r",
+							"}\r",
+							"pm.environment.set(\"todo-padding\", ++todoPadding);\r",
+							"pm.environment.set(\"title\", pm.environment.get(\"email\") + \"_Todo\");\r",
+							"pm.environment.set(\"description\", \"Writing a postman test for this todo_\" + pm.environment.get(\"todo-padding\"));\r",
+							"pm.environment.set(\"is-complete\", \"false\");\r",
+							"pm.environment.set(\"update-date\", moment().format(\"YYYY-MM-DD\"));"
 						],
 						"type": "text/javascript"
 					}
@@ -228,7 +313,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"Title\": \"{{username}}_Todo\",\n    \"Description\": \"Writing a postman test for this todo\",\n    \"IsComplete\": \"false\"\n}",
+					"raw": "{\n    \"Title\": \"{{title}}\",\n    \"Description\": \"{{description}}\",\n    \"IsComplete\": \"{{is-complete}}\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -257,7 +342,35 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							""
+							"pm.test(\"Ensure the Code Status is 200 [OK]\", function(){\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"let response = pm.response.json();\r",
+							"pm.test(\"Ensure Title is correct\", function(){\r",
+							"    pm.expect(response.title).to.eql(pm.environment.get(\"title\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Description is correct\", function(){\r",
+							"    pm.expect(response.description).to.eql(pm.environment.get(\"description\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure IsComplete is false\", function(){\r",
+							"    let response = pm.response.json();\r",
+							"    pm.expect(response.isComplete).to.be.false;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure User Id matches parsed Id\", function(){\r",
+							"    pm.expect(response.user.id).to.eql(parseInt(pm.environment.get(\"new-user-id\")));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Username is correct\", function(){\r",
+							"    pm.expect(response.user.email).to.be.eql(pm.environment.get(\"email\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Email is correct\", function(){\r",
+							"    pm.expect(response.user.email).to.be.eql(pm.environment.get(\"email\"));\r",
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -276,7 +389,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:5000/api/todos/{{TodoId}}",
+					"raw": "http://localhost:5000/api/todos/{{todo-id}}",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -285,7 +398,7 @@
 					"path": [
 						"api",
 						"todos",
-						"{{TodoId}}"
+						"{{todo-id}}"
 					]
 				}
 			},
@@ -293,6 +406,40 @@
 		},
 		{
 			"name": "Get all todos (authorized in user)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ensure the Code Status is 200 [OK]\", function(){\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"var moment = require('moment');\r",
+							"let allTodos = pm.response.json();\r",
+							"let lastAddedTodo = allTodos[allTodos.length - 1];\r",
+							"\r",
+							"pm.test(\"Ensure Title is correct\", function(){\r",
+							"    pm.expect(lastAddedTodo.title).to.eql(pm.environment.get(\"title\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Description is correct\", function(){\r",
+							"    pm.expect(lastAddedTodo.description).to.eql(pm.environment.get(\"description\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure IsComplete is false\", function(){\r",
+							"    pm.expect(lastAddedTodo.isComplete).to.be.false;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Last Update Date is correct\", function(){\r",
+							"    let lastUpdated = new Date(lastAddedTodo.lastUpdate);\r",
+							"    pm.expect(moment(lastUpdated).format(\"YYYY-MM-DD\")).to.eql(pm.environment.get(\"update-date\"));\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -301,7 +448,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "bearer {{admin-token}}",
+						"value": "bearer {{normal-user-token}}",
 						"type": "text"
 					}
 				],
@@ -315,7 +462,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/todos/1",
+					"raw": "http://localhost:5000/api/todos",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -323,8 +470,7 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"todos",
-						"1"
+						"todos"
 					]
 				}
 			},
@@ -332,6 +478,29 @@
 		},
 		{
 			"name": "Update todo",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let moment = require('moment');\r",
+							"pm.environment.set(\"title\", pm.environment.get(\"title\") + \"_\" + moment().format((\"YYYY-MM-DD\")));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ensure the Code Status is 200 [OK]\", function(){\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"auth": {
 					"type": "noauth"
@@ -346,7 +515,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"title\": \"kingnathim_Todo\",\n    \"description\": \"Writing a method to get the recently created Todo ID.\",\n    \"isComplete\": true\n}",
+					"raw": "{\n    \"title\": \"{{title}}\",\n    \"description\": \"{{description}}\",\n    \"isComplete\": {{is-complete}}\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -354,7 +523,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/todos/{{TodoId}}",
+					"raw": "http://localhost:5000/api/todos/{{todo-id}}",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -363,7 +532,75 @@
 					"path": [
 						"api",
 						"todos",
-						"{{TodoId}}"
+						"{{todo-id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get todo by Id [Updated]",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ensure the Code Status is 200 [OK]\", function(){\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"let response = pm.response.json();\r",
+							"pm.test(\"Ensure Title is correct\", function(){\r",
+							"    pm.expect(response.title).to.eql(pm.environment.get(\"title\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Description is correct\", function(){\r",
+							"    pm.expect(response.description).to.eql(pm.environment.get(\"description\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure IsComplete is false\", function(){\r",
+							"    pm.expect(response.isComplete).to.be.false;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure User Id matches parsed Id\", function(){\r",
+							"    pm.expect(response.user.id).to.eql(parseInt(pm.environment.get(\"new-user-id\")));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Username is correct\", function(){\r",
+							"    pm.expect(response.user.username).to.be.eql(pm.environment.get(\"email\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Email is correct\", function(){\r",
+							"    pm.expect(response.user.email).to.be.eql(pm.environment.get(\"email\"));\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer {{normal-user-token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/todos/{{todo-id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"todos",
+						"{{todo-id}}"
 					]
 				}
 			},
@@ -371,18 +608,34 @@
 		},
 		{
 			"name": "Update IsComplete field",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ensure the Code Status is 200 [OK]\", function(){\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "noauth"
+				},
 				"method": "PUT",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "bearer {{auth-token}}",
+						"value": "bearer {{normal-user-token}}",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"Value\": false\n}",
+					"raw": "{\n    \"Value\": true\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -390,7 +643,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/todos/1/IsComplete",
+					"raw": "http://localhost:5000/api/todos/{{todo-id}}/IsComplete",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -399,7 +652,7 @@
 					"path": [
 						"api",
 						"todos",
-						"1",
+						"{{todo-id}}",
 						"IsComplete"
 					]
 				}
@@ -407,18 +660,59 @@
 			"response": []
 		},
 		{
-			"name": "Delete todo",
+			"name": "Get todo by Id [Updated isComplete]",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ensure the Code Status is 200 [OK]\", function(){\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"let response = pm.response.json();\r",
+							"pm.test(\"Ensure Title is correct\", function(){\r",
+							"    pm.expect(response.title).to.eql(pm.environment.get(\"title\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Description is correct\", function(){\r",
+							"    pm.expect(response.description).to.eql(pm.environment.get(\"description\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure IsComplete is true\", function(){\r",
+							"    pm.expect(response.isComplete).to.be.true;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure User Id matches parsed Id\", function(){\r",
+							"    pm.expect(response.user.id).to.eql(parseInt(pm.environment.get(\"new-user-id\")));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Username is correct\", function(){\r",
+							"    pm.expect(response.user.username).to.be.eql(pm.environment.get(\"email\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Email is correct\", function(){\r",
+							"    pm.expect(response.user.email).to.be.eql(pm.environment.get(\"email\"));\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
-				"method": "DELETE",
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "bearer {{auth-token}}",
+						"value": "bearer {{normal-user-token}}",
 						"type": "text"
 					}
 				],
 				"url": {
-					"raw": "http://localhost:5000/api/todos/8",
+					"raw": "http://localhost:5000/api/todos/{{todo-id}}",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -427,7 +721,63 @@
 					"path": [
 						"api",
 						"todos",
-						"8"
+						"{{todo-id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete todo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ensure the Code Status is 200 [OK]\", function(){\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"let response = pm.response.json();\r",
+							"pm.test(\"Ensure Title is correct\", function(){\r",
+							"    pm.expect(response.title).to.eql(pm.environment.get(\"title\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Description is correct\", function(){\r",
+							"    pm.expect(response.description).to.eql(pm.environment.get(\"description\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure IsComplete is true\", function(){\r",
+							"    pm.expect(response.isComplete).to.be.true;\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer {{normal-user-token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/todos/{{todo-id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"todos",
+						"{{todo-id}}"
 					]
 				}
 			},
@@ -440,7 +790,24 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"console.log(pm.variables.get('auth-token'));"
+							"pm.test(\"Ensure the Code Status is 200 [OK]\", function(){\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"let allUsers = pm.response.json();\r",
+							"let lastAddedUser = allUsers[allUsers.length - 1];\r",
+							"\r",
+							"pm.test(\"User Id is correct\", function(){\r",
+							"    pm.expect(lastAddedUser.id).to.eql(parseInt(pm.environment.get(\"new-user-id\")));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Username is correct\", function(){\r",
+							"    pm.expect(lastAddedUser.username).to.be.eql(pm.environment.get(\"email\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ensure Email is correct\", function(){\r",
+							"    pm.expect(lastAddedUser.email).to.be.eql(pm.environment.get(\"email\"));;\r",
+							"});"
 						],
 						"type": "text/javascript"
 					}
